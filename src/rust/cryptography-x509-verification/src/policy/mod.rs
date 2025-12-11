@@ -8,6 +8,7 @@ use std::collections::HashSet;
 use std::ops::{Deref, Range};
 use std::sync::{Arc, LazyLock};
 
+use pkcs1::der::Decode;
 use asn1::ObjectIdentifier;
 use cryptography_x509::certificate::Certificate;
 use cryptography_x509::common::{
