@@ -554,8 +554,11 @@ impl<'a, B: CryptoOps> Policy<'a, B> {
             issuer_spki.algorithm.params,
             AlgorithmParameters::Rsa(_) | AlgorithmParameters::RsaPss(_)
         ) {
-            let rsa_key: pkcs1::RsaPublicKey<'_> =
-                pkcs1::RsaPublicKey::from_der(issuer_spki.subject_public_key.as_bytes()).unwrap();
+            let rsa_key: pkcs1::RsaPublicKey<'_> = pkcs1::RsaPublicKey::from_der(issuer_spki.subject_public_key.as_bytes()).map_err(|e| {
+                ValidationError::new(ValidationErrorKind::Other(
+                    format!("subject public RSA key could not be parsed: {}", e)
+                ))
+            })?;
 
             if rsa_key.modulus.as_bytes().len() * 8 < self.minimum_rsa_modulus {
                 return Err(ValidationError::new(ValidationErrorKind::Other(
