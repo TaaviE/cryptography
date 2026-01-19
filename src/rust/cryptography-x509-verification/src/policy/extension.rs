@@ -135,13 +135,13 @@ impl<'cb, B: CryptoOps + 'cb> ExtensionPolicy<'cb, B> {
             ),
             subject_key_identifier: ExtensionValidator::maybe_present(
                 SUBJECT_KEY_IDENTIFIER_OID,
-                Criticality::Agnostic,
+                Criticality::NonCritical,
                 None,
             ),
             // 5280 4.2.1.3: Key Usage
             key_usage: ExtensionValidator::maybe_present(
                 KEY_USAGE_OID,
-                Criticality::Agnostic,
+                Criticality::Critical,
                 Some(Arc::new(ee::key_usage)),
             ),
             // CA/B 7.1.2.7.12 Subscriber Certificate Subject Alternative Name
@@ -156,7 +156,7 @@ impl<'cb, B: CryptoOps + 'cb> ExtensionPolicy<'cb, B> {
             // 5280 4.2.1.9: Basic Constraints
             basic_constraints: ExtensionValidator::maybe_present(
                 BASIC_CONSTRAINTS_OID,
-                Criticality::Agnostic,
+                Criticality::Critical,
                 Some(Arc::new(ee::basic_constraints)),
             ),
             // 5280 4.2.1.10: Name Constraints
