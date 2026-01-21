@@ -47,6 +47,32 @@ pub const ACCEPTABLE_RESPONSES_OID: asn1::ObjectIdentifier =
 pub const ADMISSIONS_OID: asn1::ObjectIdentifier = asn1::oid!(1, 3, 36, 8, 3, 3);
 pub const PRIVATE_KEY_USAGE_PERIOD_OID: asn1::ObjectIdentifier = asn1::oid!(2, 5, 29, 16);
 
+// CA/B Forum S/MIME BR policy identifiers (7.1.6.1)
+pub const CABF_MAILBOX_VALIDATED_LEGACY: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 1, 1);
+pub const CABF_MAILBOX_VALIDATED_MULTIPURPOSE: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 1, 2);
+pub const CABF_MAILBOX_VALIDATED_STRICT: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 1, 3);
+pub const CABF_ORGANIZATION_VALIDATED_LEGACY: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 2, 1);
+pub const CABF_ORGANIZATION_VALIDATED_MULTIPURPOSE: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 2, 2);
+pub const CABF_ORGANIZATION_VALIDATED_STRICT: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 2, 3);
+pub const CABF_SPONSOR_VALIDATED_LEGACY: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 3, 1);
+pub const CABF_SPONSOR_VALIDATED_MULTIPURPOSE: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 3, 2);
+pub const CABF_SPONSOR_VALIDATED_STRICT: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 3, 3);
+pub const CABF_INDIVIDUAL_VALIDATED_LEGACY: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 4, 1);
+pub const CABF_INDIVIDUAL_VALIDATED_MULTIPURPOSE: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 4, 2);
+pub const CABF_INDIVIDUAL_VALIDATED_STRICT: asn1::ObjectIdentifier = 
+    asn1::oid!(2, 23, 140, 1, 5, 4, 3);
+
 // Public key identifiers
 pub const EC_OID: asn1::ObjectIdentifier = asn1::oid!(1, 2, 840, 10045, 2, 1);
 
