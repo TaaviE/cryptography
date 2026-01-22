@@ -14,7 +14,7 @@ if sys.version_info < (3, 9):
 else:
     from typing import Annotated
 
-import cryptography.hazmat.asn1 as asn1
+from cryptography.hazmat import asn1
 
 
 class TestTypesAPI:
@@ -239,7 +239,7 @@ class TestSequenceAPI:
         with pytest.raises(
             TypeError,
             match="field invalid has a SIZE annotation, but SIZE "
-            "annotations are only supported for SEQUENCE OF fields",
+            "annotations are only supported for fields of types: ",
         ):
 
             @asn1.sequence

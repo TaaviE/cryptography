@@ -44,11 +44,11 @@ jobs:
         run: uv build --build-constraint=$BUILD_REQUIREMENTS_PATH --require-hashes --sdist
       - name: Make sdist and wheel (vectors)
         run: uv build --build-constraint=$BUILD_REQUIREMENTS_PATH --require-hashes vectors/
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: "cryptography-sdist"
           path: dist/cryptography*
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: "vectors-sdist-wheel"
           path: vectors/dist/cryptography*
@@ -134,7 +134,7 @@ jobs:
             .github/actions/wheel-smoketest/
           sparse-checkout-cone-mode: false
 
-      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: cryptography-sdist
       - run: mkdir tmpwheelhouse
@@ -170,7 +170,7 @@ jobs:
           build-requirements-path: ${{ env.BUILD_REQUIREMENTS_PATH }}
           test-pip: ${{ startsWith(matrix.PYTHON.VERSION, 'cp') }}
 
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: "cryptography-${{ github.event.inputs.version }}-${{ matrix.MANYLINUX.NAME }}-${{ matrix.PYTHON.VERSION }}-${{ matrix.PYTHON.ABI_VERSION }}"
           path: wheelhouse/
@@ -254,7 +254,7 @@ jobs:
         with:
           python-version: ${{ matrix.PYTHON.VERSION }}
         if: contains(matrix.PYTHON.VERSION, 'pypy')
-      - uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      - uses: dawidd6/action-download-artifact@0bd50d53a6d7fb5cb921e607957e9cc12b4ce392 # v12
         with:
           repo: pyca/infra
           workflow: build-macos-openssl.yml
@@ -268,7 +268,7 @@ jobs:
           toolchain: stable
           # Add the x86-64 target in addition to the native arch (arm64)
           target: x86_64-apple-darwin
-      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: cryptography-sdist
 
@@ -301,7 +301,7 @@ jobs:
 
       - run: |
           echo "CRYPTOGRAPHY_WHEEL_NAME=$(basename $(ls wheelhouse/cryptography*.whl))" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: "${{ env.CRYPTOGRAPHY_WHEEL_NAME }}"
           path: wheelhouse/
@@ -342,7 +342,7 @@ jobs:
             .github/actions/wheel-smoketest/
           sparse-checkout-cone-mode: false
 
-      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: cryptography-sdist
 
@@ -357,7 +357,7 @@ jobs:
           toolchain: stable
           target: ${{ matrix.WINDOWS.RUST_TRIPLE }}
 
-      - uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      - uses: dawidd6/action-download-artifact@0bd50d53a6d7fb5cb921e607957e9cc12b4ce392 # v12
         with:
           repo: pyca/infra
           workflow: build-windows-openssl.yml
@@ -388,7 +388,7 @@ jobs:
         with:
           build-requirements-path: ${{ env.BUILD_REQUIREMENTS_PATH }}
 
-      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: "cryptography-${{ github.event.inputs.version }}-${{ matrix.WINDOWS.WINDOWS }}-${{ matrix.PYTHON.VERSION }}-${{ matrix.PYTHON.ABI_VERSION }}"
           path: wheelhouse\

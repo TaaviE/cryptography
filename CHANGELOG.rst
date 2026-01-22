@@ -8,6 +8,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Support for Python 3.8 is deprecated and will be removed in the next
+  ``cryptography`` release.
 * **BACKWARDS INCOMPATIBLE:** Support for OpenSSL 1.1.x has been removed.
   OpenSSL 3.0.0 or later is now required. LibreSSL, BoringSSL, and AWS-LC
   continue to be supported.
@@ -80,6 +82,8 @@ Changelog
   allow encrypting directly into a pre-allocated buffer.
 * Added support for PKCS1v15 signing without DigestInfo using
   :class:`~cryptography.hazmat.primitives.asymmetric.utils.NoDigestInfo`.
+* Added :meth:`~cryptography.hazmat.primitives.hashes.Hash.hash`, a one-shot
+  method for computing hashes.
 
 .. _v46-0-3:
 

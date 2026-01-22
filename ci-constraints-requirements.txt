@@ -18,11 +18,11 @@ build==1.2.2.post1 ; python_full_version < '3.9'
     # via
     #   cryptography (pyproject.toml)
     #   check-sdist
-build==1.3.0 ; python_full_version >= '3.9'
+build==1.4.0 ; python_full_version >= '3.9'
     # via
     #   cryptography (pyproject.toml)
     #   check-sdist
-certifi==2025.11.12
+certifi==2026.1.4
     # via
     #   cryptography (pyproject.toml)
     #   requests
@@ -30,7 +30,7 @@ charset-normalizer==3.4.4
     # via requests
 check-sdist==1.2.0 ; python_full_version < '3.9'
     # via cryptography (pyproject.toml)
-check-sdist==1.3.1 ; python_full_version >= '3.9'
+check-sdist==1.3.2 ; python_full_version >= '3.9'
     # via cryptography (pyproject.toml)
 click==8.1.8 ; python_full_version < '3.10'
     # via cryptography (pyproject.toml)
@@ -49,7 +49,7 @@ coverage==7.6.1 ; python_full_version < '3.9'
     # via pytest-cov
 coverage==7.10.7 ; python_full_version == '3.9.*'
     # via pytest-cov
-coverage==7.12.0 ; python_full_version >= '3.10'
+coverage==7.13.1 ; python_full_version >= '3.10'
     # via pytest-cov
 dependency-groups==1.3.1
     # via nox
@@ -60,7 +60,12 @@ docutils==0.20.1 ; python_full_version < '3.9'
     #   readme-renderer
     #   sphinx
     #   sphinx-rtd-theme
-docutils==0.21.2 ; python_full_version >= '3.9'
+docutils==0.21.2 ; python_full_version >= '3.9' and python_full_version < '3.11'
+    # via
+    #   readme-renderer
+    #   sphinx
+    #   sphinx-rtd-theme
+docutils==0.22.4 ; python_full_version >= '3.11'
     # via
     #   readme-renderer
     #   sphinx
@@ -73,13 +78,13 @@ filelock==3.16.1 ; python_full_version < '3.9'
     # via virtualenv
 filelock==3.19.1 ; python_full_version == '3.9.*'
     # via virtualenv
-filelock==3.20.0 ; python_full_version >= '3.10'
+filelock==3.20.3 ; python_full_version >= '3.10'
     # via virtualenv
 humanize==4.10.0 ; python_full_version < '3.9'
     # via nox
 humanize==4.13.0 ; python_full_version == '3.9.*'
     # via nox
-humanize==4.14.0 ; python_full_version >= '3.10'
+humanize==4.15.0 ; python_full_version >= '3.10'
     # via nox
 idna==3.11
     # via requests
@@ -90,7 +95,7 @@ importlib-metadata==8.5.0 ; python_full_version < '3.9'
     #   build
     #   pytest-randomly
     #   sphinx
-importlib-metadata==8.7.0 ; python_full_version >= '3.9' and python_full_version < '3.10.2'
+importlib-metadata==8.7.1 ; python_full_version >= '3.9' and python_full_version < '3.10.2'
     # via
     #   build
     #   pytest-randomly
@@ -103,7 +108,7 @@ iniconfig==2.3.0 ; python_full_version >= '3.10'
     # via pytest
 jinja2==3.1.6
     # via sphinx
-librt==0.7.3 ; python_full_version >= '3.9'
+librt==0.7.8 ; python_full_version >= '3.9' and platform_python_implementation != 'PyPy'
     # via mypy
 markupsafe==2.1.5 ; python_full_version < '3.9'
     # via jinja2
@@ -111,7 +116,7 @@ markupsafe==3.0.3 ; python_full_version >= '3.9'
     # via jinja2
 mypy==1.14.1 ; python_full_version < '3.9'
     # via cryptography (pyproject.toml)
-mypy==1.19.0 ; python_full_version >= '3.9'
+mypy==1.19.1 ; python_full_version >= '3.9'
     # via cryptography (pyproject.toml)
 mypy-extensions==1.1.0
     # via mypy
@@ -119,14 +124,16 @@ nh3==0.3.2
     # via readme-renderer
 nox==2025.11.12
     # via cryptography (pyproject.toml)
-packaging==25.0
+packaging==26.0
     # via
     #   build
     #   dependency-groups
     #   nox
     #   pytest
     #   sphinx
-pathspec==0.12.1
+pathspec==0.12.1 ; python_full_version < '3.9'
+    # via check-sdist
+pathspec==1.0.3 ; python_full_version >= '3.9'
     # via
     #   check-sdist
     #   mypy
@@ -210,9 +217,9 @@ requests==2.32.5 ; python_full_version >= '3.9'
     # via
     #   sphinx
     #   sphinxcontrib-spelling
-roman-numerals-py==3.1.0 ; python_full_version >= '3.11'
+roman-numerals==4.1.0 ; python_full_version >= '3.11'
     # via sphinx
-ruff==0.14.8
+ruff==0.14.13
     # via cryptography (pyproject.toml)
 snowballstemmer==3.0.1
     # via sphinx
@@ -237,16 +244,23 @@ sphinx==8.1.3 ; python_full_version == '3.10.*'
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
     #   sphinxcontrib-spelling
-sphinx==8.2.3 ; python_full_version >= '3.11'
+sphinx==9.0.4 ; python_full_version == '3.11.*'
     # via
     #   cryptography (pyproject.toml)
     #   sphinx-inline-tabs
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
     #   sphinxcontrib-spelling
-sphinx-inline-tabs==2023.4.21
+sphinx==9.1.0 ; python_full_version >= '3.12'
+    # via
+    #   cryptography (pyproject.toml)
+    #   sphinx-inline-tabs
+    #   sphinx-rtd-theme
+    #   sphinxcontrib-jquery
+    #   sphinxcontrib-spelling
+sphinx-inline-tabs==2025.12.21.14
     # via cryptography (pyproject.toml)
-sphinx-rtd-theme==3.0.2
+sphinx-rtd-theme==3.1.0
     # via cryptography (pyproject.toml)
 sphinxcontrib-applehelp==1.0.4 ; python_full_version < '3.9'
     # via sphinx
@@ -276,7 +290,7 @@ sphinxcontrib-spelling==8.0.0 ; python_full_version < '3.10'
     # via cryptography (pyproject.toml)
 sphinxcontrib-spelling==8.0.2 ; python_full_version >= '3.10'
     # via cryptography (pyproject.toml)
-tomli==2.3.0 ; python_full_version <= '3.11'
+tomli==2.4.0 ; python_full_version <= '3.11'
     # via
     #   build
     #   check-sdist
@@ -300,11 +314,11 @@ typing-extensions==4.15.0 ; python_full_version >= '3.9'
     #   virtualenv
 urllib3==2.2.3 ; python_full_version < '3.9'
     # via requests
-urllib3==2.6.1 ; python_full_version >= '3.9'
+urllib3==2.6.3 ; python_full_version >= '3.9'
     # via requests
-uv==0.9.17
+uv==0.9.26
     # via nox
-virtualenv==20.35.4
+virtualenv==20.36.1
     # via nox
 zipp==3.20.2 ; python_full_version < '3.9'
     # via

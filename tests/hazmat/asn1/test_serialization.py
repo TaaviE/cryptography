@@ -15,7 +15,8 @@ if sys.version_info < (3, 9):
 else:
     from typing import Annotated
 
-import cryptography.hazmat.asn1 as asn1
+from cryptography import x509
+from cryptography.hazmat import asn1
 
 U = typing.TypeVar("U")
 
@@ -134,6 +135,26 @@ class TestIA5String:
                 (asn1.IA5String(""), b"\x16\x00"),
                 (asn1.IA5String("hello"), b"\x16\x05hello"),
                 (asn1.IA5String("Test User 1"), b"\x16\x0bTest User 1"),
+            ]
+        )
+
+
+class TestObjectIdentifier:
+    def test_ok_object_identifier(self) -> None:
+        assert_roundtrips(
+            [
+                (
+                    x509.ObjectIdentifier("1.3.6.1.4.1.343"),
+                    b"\x06\x07\x2b\x06\x01\x04\x01\x82\x57",
+                ),
+                (
+                    x509.ObjectIdentifier("1.2.840.113549.1.1.1"),
+                    b"\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01",
+                ),
+                (
+                    x509.ObjectIdentifier("1.3.6.1.4.1.55738.3"),
+                    b"\x06\x09\x2b\x06\x01\x04\x01\x83\xb3\x3a\x03",
+                ),
             ]
         )
 
@@ -369,111 +390,6 @@ class TestSequence:
             ]
         )
 
-    def test_ok_sequenceof_size_restriction(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size(min=1, max=4)]
-
-        assert_roundtrips(
-            [
-                (
-                    Example(a=[1, 2, 3, 4]),
-                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-                )
-            ]
-        )
-
-    def test_ok_sequenceof_size_restriction_no_max(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size(min=1, max=None)]
-
-        assert_roundtrips(
-            [
-                (
-                    Example(a=[1, 2, 3, 4]),
-                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-                )
-            ]
-        )
-
-    def test_ok_sequenceof_size_restriction_exact(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size.exact(4)]
-
-        assert_roundtrips(
-            [
-                (
-                    Example(a=[1, 2, 3, 4]),
-                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-                )
-            ]
-        )
-
-    def test_fail_sequenceof_size_too_big(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size(min=1, max=2)]
-
-        with pytest.raises(
-            ValueError,
-            match=re.escape("SEQUENCE OF has size 4, expected size in [1, 2]"),
-        ):
-            asn1.decode_der(
-                Example,
-                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-            )
-
-        with pytest.raises(
-            ValueError,
-        ):
-            asn1.encode_der(Example(a=[1, 2, 3, 4]))
-
-    def test_fail_sequenceof_size_too_small(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size(min=5, max=6)]
-
-        with pytest.raises(
-            ValueError,
-            match=re.escape("SEQUENCE OF has size 4, expected size in [5, 6]"),
-        ):
-            asn1.decode_der(
-                Example,
-                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-            )
-
-        with pytest.raises(
-            ValueError,
-        ):
-            asn1.encode_der(Example(a=[1, 2, 3, 4]))
-
-    def test_fail_sequenceof_size_not_exact(self) -> None:
-        @asn1.sequence
-        @_comparable_dataclass
-        class Example:
-            a: Annotated[typing.List[int], asn1.Size.exact(5)]
-
-        with pytest.raises(
-            ValueError,
-            match=re.escape("SEQUENCE OF has size 4, expected size in [5, 5]"),
-        ):
-            asn1.decode_der(
-                Example,
-                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
-            )
-
-        with pytest.raises(
-            ValueError,
-        ):
-            asn1.encode_der(Example(a=[1, 2, 3, 4]))
-
     def test_ok_sequence_with_optionals(self) -> None:
         @asn1.sequence
         @_comparable_dataclass
@@ -550,6 +466,7 @@ class TestSequence:
             g: typing.Union[typing.List[int], None]
             h: typing.Union[asn1.BitString, None]
             i: typing.Union[asn1.IA5String, None]
+            j: typing.Union[x509.ObjectIdentifier, None]
 
         assert_roundtrips(
             [
@@ -564,6 +481,7 @@ class TestSequence:
                         g=None,
                         h=None,
                         i=None,
+                        j=None,
                     ),
                     b"\x30\x00",
                 )
@@ -682,3 +600,653 @@ class TestSequence:
             ),
         ):
             asn1.decode_der(Example, b"\x30\x05\xa2\x03\x02\x01\x09")
+
+
+class TestSize:
+    def test_ok_sequenceof_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=[1, 2, 3, 4]),
+                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+                )
+            ]
+        )
+
+    def test_ok_sequenceof_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=[1, 2, 3, 4]),
+                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+                )
+            ]
+        )
+
+    def test_ok_sequenceof_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=[1, 2, 3, 4]),
+                    b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+                )
+            ]
+        )
+
+    def test_fail_sequenceof_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("SEQUENCE OF has size 4, expected size in [1, 2]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=[1, 2, 3, 4]))
+
+    def test_fail_sequenceof_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("SEQUENCE OF has size 4, expected size in [5, 6]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=[1, 2, 3, 4]))
+
+    def test_fail_sequenceof_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[typing.List[int], asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("SEQUENCE OF has size 4, expected size in [5, 5]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x0e\x30\x0c\x02\x01\x01\x02\x01\x02\x02\x01\x03\x02\x01\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=[1, 2, 3, 4]))
+
+    def test_ok_bytes_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=b"\x01\x02\x03\x04"),
+                    b"\x30\x06\x04\x04\x01\x02\x03\x04",
+                )
+            ]
+        )
+
+    def test_ok_bytes_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=b"\x01\x02\x03\x04"),
+                    b"\x30\x06\x04\x04\x01\x02\x03\x04",
+                )
+            ]
+        )
+
+    def test_ok_bytes_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=b"\x01\x02\x03\x04"),
+                    b"\x30\x06\x04\x04\x01\x02\x03\x04",
+                )
+            ]
+        )
+
+    def test_fail_bytes_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "OCTET STRING has size 4, expected size in [1, 2]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x04\x04\x01\x02\x03\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=b"\x01\x02\x03\x04"))
+
+    def test_fail_bytes_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "OCTET STRING has size 4, expected size in [5, 6]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x04\x04\x01\x02\x03\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=b"\x01\x02\x03\x04"))
+
+    def test_fail_bytes_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[bytes, asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "OCTET STRING has size 4, expected size in [5, 5]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x04\x04\x01\x02\x03\x04",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=b"\x01\x02\x03\x04"))
+
+    def test_ok_string_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a="abcd"),
+                    b"\x30\x06\x0c\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_string_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a="abcd"),
+                    b"\x30\x06\x0c\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_string_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a="abcd"),
+                    b"\x30\x06\x0c\x04abcd",
+                )
+            ]
+        )
+
+    def test_fail_string_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("UTF8String has size 4, expected size in [1, 2]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x0c\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a="abcd"))
+
+    def test_fail_string_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("UTF8String has size 4, expected size in [5, 6]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x0c\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a="abcd"))
+
+    def test_fail_string_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[str, asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("UTF8String has size 4, expected size in [5, 5]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x0c\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a="abcd"))
+
+    def test_ok_bitstring_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.BitString(data=b"\xf0", padding_bits=4)),
+                    b"\x30\x04\x03\x02\x04\xf0",
+                )
+            ]
+        )
+
+    def test_ok_printablestring_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.PrintableString("abcd")),
+                    b"\x30\x06\x13\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_printablestring_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.PrintableString("abcd")),
+                    b"\x30\x06\x13\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_printablestring_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.PrintableString("abcd")),
+                    b"\x30\x06\x13\x04abcd",
+                )
+            ]
+        )
+
+    def test_fail_printablestring_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "PrintableString has size 4, expected size in [1, 2]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x13\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.PrintableString("abcd")))
+
+    def test_fail_printablestring_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "PrintableString has size 4, expected size in [5, 6]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x13\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.PrintableString("abcd")))
+
+    def test_fail_printablestring_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.PrintableString, asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "PrintableString has size 4, expected size in [5, 5]"
+            ),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x13\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.PrintableString("abcd")))
+
+    def test_ok_ia5string_size_restriction(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size(min=1, max=4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.IA5String("abcd")),
+                    b"\x30\x06\x16\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_ia5string_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.IA5String("abcd")),
+                    b"\x30\x06\x16\x04abcd",
+                )
+            ]
+        )
+
+    def test_ok_ia5string_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.IA5String("abcd")),
+                    b"\x30\x06\x16\x04abcd",
+                )
+            ]
+        )
+
+    def test_fail_ia5string_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("IA5String has size 4, expected size in [1, 2]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x16\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.IA5String("abcd")))
+
+    def test_fail_ia5string_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("IA5String has size 4, expected size in [5, 6]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x16\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.IA5String("abcd")))
+
+    def test_fail_ia5string_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.IA5String, asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("IA5String has size 4, expected size in [5, 5]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x06\x16\x04abcd",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(Example(a=asn1.IA5String("abcd")))
+
+    def test_ok_bitstring_size_restriction_no_max(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size(min=1, max=None)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.BitString(data=b"\xf0", padding_bits=4)),
+                    b"\x30\x04\x03\x02\x04\xf0",
+                )
+            ]
+        )
+
+    def test_ok_bitstring_size_restriction_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size.exact(4)]
+
+        assert_roundtrips(
+            [
+                (
+                    Example(a=asn1.BitString(data=b"\xf0", padding_bits=4)),
+                    b"\x30\x04\x03\x02\x04\xf0",
+                )
+            ]
+        )
+
+    def test_fail_bitstring_size_too_big(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size(min=1, max=2)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("BIT STRING has size 4, expected size in [1, 2]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x04\x03\x02\x04\xf0",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(
+                Example(a=asn1.BitString(data=b"\xf0", padding_bits=4))
+            )
+
+    def test_fail_bitstring_size_too_small(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size(min=5, max=6)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("BIT STRING has size 4, expected size in [5, 6]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x04\x03\x02\x04\xf0",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(
+                Example(a=asn1.BitString(data=b"\xf0", padding_bits=4))
+            )
+
+    def test_fail_bitstring_size_not_exact(self) -> None:
+        @asn1.sequence
+        @_comparable_dataclass
+        class Example:
+            a: Annotated[asn1.BitString, asn1.Size.exact(5)]
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape("BIT STRING has size 4, expected size in [5, 5]"),
+        ):
+            asn1.decode_der(
+                Example,
+                b"\x30\x04\x03\x02\x04\xf0",
+            )
+
+        with pytest.raises(
+            ValueError,
+        ):
+            asn1.encode_der(
+                Example(a=asn1.BitString(data=b"\xf0", padding_bits=4))
+            )
